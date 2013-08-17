@@ -1,42 +1,42 @@
-(function(root){
+(function (root) {
     "use strict";
 
     //Local variable declarations
     var Helpers, Rules, Form, Mesosphere, Aggregates, Formats, Transforms;
 
     Aggregates = {
-        sum: function(fields, formFieldsObject){
+        sum: function (fields, formFieldsObject) {
             var sum = 0;
-            _(fields).each( function(fieldName) {
+            _(fields).each(function (fieldName) {
                 var fieldValue = parseFloat(formFieldsObject[fieldName]);
-                if(_.isNumber(fieldValue)){
+                if (_.isNumber(fieldValue)) {
                     sum += fieldValue;
                 }
             });
             return sum.toString();
         },
-        avg: function(fields, formFieldsObject){
+        avg: function (fields, formFieldsObject) {
             var sum = parseFloat(this.sum(fields, formFieldsObject));
             sum = sum / fields.length;
             return sum.toString();
         },
-        join: function(fields, formFieldsObject, argument){
+        join: function (fields, formFieldsObject, argument) {
             var fieldValues = [];
-            _(fields).each( function(fieldName) {
+            _(fields).each(function (fieldName) {
                 fieldValues.push(formFieldsObject[fieldName]);
             });
             return fieldValues.join(argument);
         },
-        arraySet: function(fields, formFieldsObject){
+        arraySet: function (fields, formFieldsObject) {
             var newField = [];
-            _(fields).each( function(fieldName) {
+            _(fields).each(function (fieldName) {
                 newField.push(formFieldsObject[fieldName]);
             });
             return newField;
         },
-        objectSet: function(fields, formFieldsObject){
+        objectSet: function (fields, formFieldsObject) {
             var newField = {};
-            _(fields).each( function(fieldName) {
+            _(fields).each(function (fieldName) {
                 newField[fieldName] = formFieldsObject[fieldName];
             });
             return newField;
@@ -53,7 +53,7 @@
         float: /^[-]?[0-9]*[\.]?[0-9]+$/,
         alphanumeric: /^[a-zA-Z0-9\ \']+$/,
         ipv4: /^((([01]?[0-9]{1,2})|(2[0-4][0-9])|(25[0-5]))[.]){3}(([0-1]?[0-9]{1,2})|(2[0-4][0-9])|(25[0-5]))$/,
-        phone:  /^([\+][0-9]{1,3}[\ \.\-])?([\(]{1}[0-9]{2,6}[\)])?([0-9\ \.\-\/]{3,20})((x|ext|extension)[\ ]?[0-9]{1,4})?$/,
+        phone: /^([\+][0-9]{1,3}[\ \.\-])?([\(]{1}[0-9]{2,6}[\)])?([0-9\ \.\-\/]{3,20})((x|ext|extension)[\ ]?[0-9]{1,4})?$/,
         url: /^(https?|ftp):\/\/(((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:)*@)?(((\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5]))|((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?)(:\d*)?)(\/((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)+(\/(([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)*)*)?)?(\?((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|[\uE000-\uF8FF]|\/|\?)*)?(\#((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|\/|\?)*)?$/i,
 
         //TODO: Cleanup..
@@ -84,34 +84,34 @@
 
     //Rules are always passed 5 arguments, fieldValue, ruleValue, fieldName, formFieldsObject and fieldRequirements respectively.
     Rules = {
-        maxLength: function(fieldValue, ruleValue) {
+        maxLength: function (fieldValue, ruleValue) {
             return fieldValue.length <= ruleValue;
         },
-        minLength: function(fieldValue, ruleValue) {
+        minLength: function (fieldValue, ruleValue) {
             return fieldValue.length >= ruleValue;
         },
         exactLength: function (fieldValue, ruleValue) {
             // keep comparator as ==
             return fieldValue.length == ruleValue;
         },
-        failIfFound:function (fieldValue, ruleValue) {
+        failIfFound: function (fieldValue, ruleValue) {
             return fieldValue.indexOf(ruleValue) === -1;
         },
-        minValue: function(fieldValue, ruleValue) {
+        minValue: function (fieldValue, ruleValue) {
             return fieldValue >= ruleValue;
         },
-        maxValue: function(fieldValue, ruleValue) {
+        maxValue: function (fieldValue, ruleValue) {
             return fieldValue <= ruleValue;
         },
-        equalsValue: function(fieldValue, ruleValue) {
+        equalsValue: function (fieldValue, ruleValue) {
             // keep comparator as ==
             return fieldValue == ruleValue;
         },
         //TODO: equalsField, notEqualsField
-        maxFileSize: function(fieldValue, ruleValue) {
+        maxFileSize: function (fieldValue, ruleValue) {
             return this.maxValue(fieldValue.value, ruleValue);
         },
-        acceptedFileTypes: function(fieldValue, ruleValue) {
+        acceptedFileTypes: function (fieldValue, ruleValue) {
             var fileType = fieldValue.FileType;
             return ruleValue.indexOf(fileType) >= 0;
         }
@@ -120,36 +120,36 @@
 
     //Data transformation functions
     Transforms = {
-        trim: function(string) {
+        trim: function (string) {
             return _(string).trim();
         },
-        clean: function(string) {
+        clean: function (string) {
             return _(string).clean();
         },
-        capitalize: function(string) {
+        capitalize: function (string) {
             return _(string).capitalize();
         },
-        slugify:function(string) {
+        slugify: function (string) {
             return _(string).slugify();
         },
-        humanize:function(string) {
+        humanize: function (string) {
             return _(string).humanize();
         },
-        stripTags: function(string) {
+        stripTags: function (string) {
             return _(string).stripTags();
         },
-        escapeHTML: function(string) {
+        escapeHTML: function (string) {
             return _(string).escapeHTML();
         },
-        toUpperCase: function(string) {
+        toUpperCase: function (string) {
             return string.toUpperCase();
         },
-        toLowerCase: function(string) {
+        toLowerCase: function (string) {
             return string.toLowerCase();
         }
     };
 
-    Form = function(fields, aggregates, removeFields, onSuccess, onFailure){
+    Form = function (fields, aggregates, removeFields, onSuccess, onFailure) {
         this.fields = fields;
         this.onSuccess = onSuccess;
         this.onFailure = onFailure;
@@ -158,22 +158,22 @@
         this.erroredFields = {};
     };
 
-    Form.prototype.validate = function (formFields, callback){
-        return this._validate( false, formFields, callback );
+    Form.prototype.validate = function (formFields, callback) {
+        return this._validate(false, formFields, callback);
     };
 
-    Form.prototype.validateDocument = function (formFields, callback){
-        return this._validate( true, formFields, callback );
+    Form.prototype.validateDocument = function (formFields, callback) {
+        return this._validate(true, formFields, callback);
     };
 
-    Form.prototype._validate = function (isDocument, formFields, callback){
+    Form.prototype._validate = function (isDocument, formFields, callback) {
         var self = this, result;
         var formFieldsObject = (isDocument) ? formFields : this.formToObject(formFields);
 
         self.erroredFields = {};
 
         //aggregate fields first so we can validate the new field later.
-        _(self.aggregates).each( function(aggregateInfo, newFieldName) {
+        _(self.aggregates).each(function (aggregateInfo, newFieldName) {
             var aggregateName = aggregateInfo[0];
             var aggregateFields = aggregateInfo[1];
             var aggregateArgs = aggregateInfo[2];
@@ -182,8 +182,25 @@
             formFieldsObject[newFieldName] = newField;
         });
 
-        _(self.fields).each( function(field, fieldName) {
-            if( isDocument ) fieldName = field.docProperty;
+        if (isDocument) {
+            _(formFieldsObject).each(function (element, index) {
+                var found = false;
+                if (index == '_id') return;
+                _(self.fields).each(function (field) {
+                    if (field.docProperty == index) {
+                        found = true;
+                    }
+                });
+                if (!found) {
+                    self.erroredFields[index] = {
+                        message: 'Field not defined as a docProperty'
+                    };
+                }
+            });
+        }
+
+        _(self.fields).each(function (field, fieldName) {
+            if (isDocument) fieldName = field.docProperty;
             // get the current value of the field that we are validating
             var fieldValue = formFieldsObject[fieldName];
 
@@ -207,7 +224,7 @@
                         }
                     }
 
-                    if(field.required.whenFieldAbsent && _(formFieldsObject[field.required.whenFieldAbsent]).isUndefined()){
+                    if (field.required.whenFieldAbsent && _(formFieldsObject[field.required.whenFieldAbsent]).isUndefined()) {
                         self.addFieldError(fieldName, "required");
                     }
                 }
@@ -215,34 +232,34 @@
             }
 
             // if there is a value we are going to validate it
-            if(fieldValue){
+            if (fieldValue) {
 
                 // transform the data if need be.
-                if(field.transforms){
-                    fieldValue=transform(fieldValue, field.transforms);
-                    formFieldsObject[fieldName]=fieldValue;
+                if (field.transforms) {
+                    fieldValue = transform(fieldValue, field.transforms);
+                    formFieldsObject[fieldName] = fieldValue;
                 }
 
                 // check the data format
-                if(field.format) {
+                if (field.format) {
 
-                    var format=field.format;
+                    var format = field.format;
 
-                    if(_.isString(format)){
-                        format=Formats[format];
+                    if (_.isString(format)) {
+                        format = Formats[format];
                     }
 
-                    if(!format)
-                        throw new Error("Unknown format:"+field.format);
+                    if (!format)
+                        throw new Error("Unknown format:" + field.format);
                     else {
-                        if( _.isRegExp(format) ) {
+                        if (_.isRegExp(format)) {
                             // it's a regular expression
-                            if(!format.test(fieldValue)){
+                            if (!format.test(fieldValue)) {
                                 self.addFieldError(fieldName, "Invalid format");
                             }
                         } else {
                             // it's a function
-                            if(!format(fieldValue)){
+                            if (!format(fieldValue)) {
                                 self.addFieldError(fieldName, "Invalid format");
                             }
                         }
@@ -251,17 +268,17 @@
                 }
 
                 // check rule sets
-                _(field.rules).each( function( ruleValue, ruleName ) {
-                    if(_.isArray(fieldValue)){
-                        _(fieldValue).each( function( subValue, key ) {
+                _(field.rules).each(function (ruleValue, ruleName) {
+                    if (_.isArray(fieldValue)) {
+                        _(fieldValue).each(function (subValue, key) {
                             result = Rules[ruleName](subValue, ruleValue, fieldName, formFieldsObject, self.fields);
-                            if(!result){
+                            if (!result) {
                                 self.addFieldError(fieldName, ruleName, key);
                             }
                         });
-                    }else{
+                    } else {
                         result = Rules[ruleName](fieldValue, ruleValue, fieldName, formFieldsObject, self.fields);
-                        if(!result){
+                        if (!result) {
                             self.addFieldError(fieldName, ruleName);
                         }
                     }
@@ -272,62 +289,62 @@
         });
 
         //remove any unwanted fields
-        _(self.removeFields).each( function( value ) {
+        _(self.removeFields).each(function (value) {
             delete formFieldsObject[value];
         });
 
-        if(_.isEmpty(self.erroredFields)){
+        if (_.isEmpty(self.erroredFields)) {
             self.erroredFields = false;
-            if(Meteor.isClient){
+            if (Meteor.isClient) {
                 self.onSuccess(formFieldsObject);
             }
-        }else{
+        } else {
             self.addMessages();
-            if(Meteor.isClient){
+            if (Meteor.isClient) {
                 self.onFailure(self.erroredFields);
             }
         }
 
-        if(callback && _(callback).isFunction()){
+        if (callback && _(callback).isFunction()) {
             callback(self.erroredFields, formFieldsObject);
-        }else{
-            return {errors:self.erroredFields, formData:formFieldsObject};
+        } else {
+            return {errors: self.erroredFields, formData: formFieldsObject};
         }
 
     };
 
-    Form.prototype.addMessages = function(){
+    Form.prototype.addMessages = function () {
         var self = this;
-        _(self.erroredFields).each( function( value, key ) {
-            self.erroredFields[key].message = self.erroredFields[key].required ? "*Required Field*" : self.fields[key].message || "*Invalid Input*";
+        _(self.erroredFields).each(function (value, key) {
+            if (self.erroredFields[key].message) return;
+            self.erroredFields[key].message = self.erroredFields[key].required ? "*Required Field*" : (self.fields[key] && self.fields[key].message) || "*Invalid Input*";
         });
     };
 
-    Form.prototype.addFieldError = function(fieldName, ruleName, key){
-
-        if(!this.erroredFields[fieldName])
+    Form.prototype.addFieldError = function (fieldName, ruleName, key) {
+        if (!this.erroredFields[fieldName])
             this.erroredFields[fieldName] = {};
-        if(key){
-            if(!this.erroredFields[fieldName][ruleName])
+        if (key) {
+            if (!this.erroredFields[fieldName][ruleName])
                 this.erroredFields[fieldName][ruleName] = [];
             this.erroredFields[fieldName][ruleName][key] = true;
-        }else{
+        } else {
             this.erroredFields[fieldName][ruleName] = true;
         }
     };
 
-    Form.prototype.formToObject = function(formFields){
+    Form.prototype.formToObject = function (formFields) {
         var formFieldsObject = {};
 
-        _(formFields).each( function( field ) {
+        _(formFields).each(function (field) {
             var name = field.name;
             var value = field.fileType ? _(field).pick(value, fileType) : field.value;
 
-            if(_.isUndefined(formFieldsObject[name])){
+            if (_.isUndefined(formFieldsObject[name])) {
                 formFieldsObject[name] = value;
-            }else if(_.isArray(formFieldsObject[name])){
+            } else if (_.isArray(formFieldsObject[name])) {
                 formFieldsObject[name].push(value);
-            }else{
+            } else {
                 formFieldsObject[name] = [formFieldsObject[name], value];
             }
         });
@@ -337,18 +354,18 @@
 
     var transform = function (fieldValue, transformList) {
         _(transformList).each(function (transformName) {
-            var transform=Transforms[transformName];
-            if (transform){
+            var transform = Transforms[transformName];
+            if (transform) {
                 fieldValue = transform(fieldValue);
             }
-            else{
+            else {
                 throw new Error("Invalid transform:" + transformName);
             }
         });
         return fieldValue;
     };
 
-    var getFormData = function(formElem){
+    var getFormData = function (formElem) {
         var formData = $(formElem).serializeArray(), fileInputs = $(formElem).find("input[type=file]");
 
         fileInputs.each(function () {
@@ -367,55 +384,55 @@
         return formData;
     };
 
-    var failureCallback = function(erroredFields){
+    var failureCallback = function (erroredFields) {
         $(".meso-error").text("");
-        _(erroredFields).each( function( value, key, errObj ) {
-            $("#"+key+"-error").addClass("meso-error").text(value.message);
+        _(erroredFields).each(function (value, key, errObj) {
+            $("#" + key + "-error").addClass("meso-error").text(value.message);
         });
     };
 
-    var successCallback = function(){
+    var successCallback = function () {
         $(".meso-error").text("");
         $(".meso-error").removeClass("meso-error");
     };
 
-    Mesosphere = function(optionsObject){
+    Mesosphere = function (optionsObject) {
         var selector = "";
         var formIdentifier = optionsObject.name || optionsObject.id;
 
-        optionsObject = _({onSuccess:successCallback, onFailure:failureCallback}).extend(optionsObject);
+        optionsObject = _({onSuccess: successCallback, onFailure: failureCallback}).extend(optionsObject);
 
         //Make sure they've got all the info we need and they haven't provided the same form information twice
-        if(!formIdentifier)
+        if (!formIdentifier)
             throw new Error("Please specify the name of the form to validate.");
-        if(!optionsObject.fields)
+        if (!optionsObject.fields)
             throw new Error("Please specify which fields to validate.");
-        if(Mesosphere[formIdentifier])
+        if (Mesosphere[formIdentifier])
             throw new Error("Form is already being validated");
 
         //Create a new form object scoped to Mesosphere.formName
         Mesosphere[formIdentifier] = new Form(optionsObject.fields, optionsObject.aggregate, optionsObject.removeFields, optionsObject.onSuccess, optionsObject.onFailure);
 
         //if this is the browser, set up a submit event handler.
-        if(Meteor.isClient){
+        if (Meteor.isClient) {
 
             //decide which selector to use to grab the form handle
-            if(optionsObject.name){
-                selector = 'form[name='+optionsObject.name+']';
-            }else{
-                selector = '#'+optionsObject.id;
+            if (optionsObject.name) {
+                selector = 'form[name=' + optionsObject.name + ']';
+            } else {
+                selector = '#' + optionsObject.id;
             }
 
-            $(function(){
+            $(function () {
                 //attach a submit event to the form
                 $(root.document.body).on('submit', selector, function (event) {
                     event.preventDefault();
 
                     var formFields = getFormData(this);
 
-                    if(_(optionsObject.method).isFunction()){
+                    if (_(optionsObject.method).isFunction()) {
                         optionsObject.method(formFields);
-                    }else{
+                    } else {
                         Meteor.call(optionsObject.method, formFields);
                     }
                 });
