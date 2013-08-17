@@ -162,8 +162,16 @@
     };
 
     Form.prototype.validate = function (formFields, callback){
-        var self = this, result, validationObject;
-        var formFieldsObject = this.formToObject(formFields);
+        return this._validate( false, formFields, callback );
+    };
+
+    Form.prototype.validateDocument = function (formFields, callback){
+        return this._validate( true, formFields, callback );
+    };
+
+    Form.prototype._validate = function (isDocument, formFields, callback){
+        var self = this, result;
+        var formFieldsObject = (isDocument) ? formFields : this.formToObject(formFields);
 
         self.erroredFields = {};
 
@@ -178,7 +186,7 @@
         });
 
         _(self.fields).each( function(field, fieldName) {
-
+            if( isDocument ) fieldName = field.docProperty;
             // get the current value of the field that we are validating
             var fieldValue = formFieldsObject[fieldName];
 
@@ -248,12 +256,12 @@
                 // check rule sets
                 _(field.rules).each( function( ruleValue, ruleName ) {
                     if(_.isArray(fieldValue)){
-                       _(fieldValue).each( function( subValue, key ) {
-                           result = Rules[ruleName](subValue, ruleValue, fieldName, formFieldsObject, self.fields);
-                           if(!result){
-                               self.addFieldError(fieldName, ruleName, key);
-                           }
-                       });
+                        _(fieldValue).each( function( subValue, key ) {
+                            result = Rules[ruleName](subValue, ruleValue, fieldName, formFieldsObject, self.fields);
+                            if(!result){
+                                self.addFieldError(fieldName, ruleName, key);
+                            }
+                        });
                     }else{
                         result = Rules[ruleName](fieldValue, ruleValue, fieldName, formFieldsObject, self.fields);
                         if(!result){
@@ -268,7 +276,7 @@
 
         //remove any unwanted fields
         _(self.removeFields).each( function( value ) {
-           delete formFieldsObject[value];
+            delete formFieldsObject[value];
         });
 
         if(_.isEmpty(self.erroredFields)){
@@ -307,7 +315,7 @@
                 this.erroredFields[fieldName][ruleName] = [];
             this.erroredFields[fieldName][ruleName][key] = true;
         }else{
-           this.erroredFields[fieldName][ruleName] = true;
+            this.erroredFields[fieldName][ruleName] = true;
         }
     };
 
@@ -347,16 +355,16 @@
         var formData = $(formElem).serializeArray(), fileInputs = $(formElem).find("input[type=file]");
 
         fileInputs.each(function () {
-          var fileSize, fileType, fieldName = this.name;
+            var fileSize, fileType, fieldName = this.name;
 
-          if (this.files.length > 0) {
-            fileSize = this.files[0].size;
-            fileType = this.files[0].type;
-          } else {
-            fileSize = 0;
-            fileType = '';
-          }
-          formData.push({name: fieldName, value: fileSize, fileType: fileType, files: this.files});
+            if (this.files.length > 0) {
+                fileSize = this.files[0].size;
+                fileType = this.files[0].type;
+            } else {
+                fileSize = 0;
+                fileType = '';
+            }
+            formData.push({name: fieldName, value: fileSize, fileType: fileType, files: this.files});
         });
 
         return formData;
@@ -424,10 +432,10 @@
     Mesosphere.Aggregates = Aggregates;
 
     Mesosphere.registerAggregate = function (name, fn) {
-      if (Mesosphere.Aggregates[name]) {
-        throw new Error(name + " is already defined as a aggregate.");
-      }
-      Mesosphere.Transforms[name] = fn;
+        if (Mesosphere.Aggregates[name]) {
+            throw new Error(name + " is already defined as a aggregate.");
+        }
+        Mesosphere.Transforms[name] = fn;
     };
 
     Mesosphere.registerFormat = function (name, fn) {
@@ -438,17 +446,17 @@
     };
 
     Mesosphere.registerRule = function (name, fn) {
-      if (Mesosphere.Rules[name]) {
-        throw new Error(name + " is already defined as a rule.");
-      }
-      Mesosphere.Rules[name] = fn;
+        if (Mesosphere.Rules[name]) {
+            throw new Error(name + " is already defined as a rule.");
+        }
+        Mesosphere.Rules[name] = fn;
     };
 
     Mesosphere.registerTransform = function (name, fn) {
-      if (Mesosphere.Transforms[name]) {
-        throw new Error(name + " is already defined as a transform.");
-      }
-      Mesosphere.Transforms[name] = fn;
+        if (Mesosphere.Transforms[name]) {
+            throw new Error(name + " is already defined as a transform.");
+        }
+        Mesosphere.Transforms[name] = fn;
     };
 
     root.Mesosphere = Mesosphere;
