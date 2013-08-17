@@ -7,7 +7,6 @@
     "git": "https://github.com/copleykj/Mesosphere.git",
     "packages": {
         "underscore-string": {
-            "git": "https://github.com/pinfake/meteor-underscore-string.git"
         }
     }
 }
