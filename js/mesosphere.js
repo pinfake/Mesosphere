@@ -2,10 +2,7 @@
     "use strict";
 
     //Local variable declarations
-    var $, _, Meteor, Helpers, Rules, Form, Mesosphere, Aggregates, Formats, Transforms;
-
-    //Setup access to jQuery, Underscore and Meteor
-    $=root.jQuery; _=root._; Meteor=root.Meteor;
+    var Helpers, Rules, Form, Mesosphere, Aggregates, Formats, Transforms;
 
     Aggregates = {
         sum: function(fields, formFieldsObject){
@@ -461,3 +458,5 @@
 
     root.Mesosphere = Mesosphere;
 }(this));
+
+Mesosphere = this.Mesosphere;
